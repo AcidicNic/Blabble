@@ -5,8 +5,9 @@ const app = express();
 // socket.io setup
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+let onlineUsers = {};
 io.on("connection", (socket) => {
-  require('./sockets/chat.js')(io, socket);
+  require('./sockets/chat.js')(io, socket, onlineUsers);
 })
 
 // express-handlebars setup
