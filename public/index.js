@@ -6,9 +6,8 @@ $(document).ready(() => {
   let currentUser;
 
   socket.emit('get online users');
-  socket.emit('user changed channel', "General");
 
-  $(document).on('click', '.channel', (e) => {
+  $(document).on('click', '.channel', (e)=>{
     let newChannel = e.target.textContent;
     socket.emit('user changed channel', newChannel);
   });
@@ -18,6 +17,8 @@ $(document).ready(() => {
 
     if($('#username-input').val().length > 0){
       socket.emit('new user', $('#username-input').val());
+      socket.emit('get all channels');
+      socket.emit('user changed channel', "General");
       currentUser = $('#username-input').val();
       $('.main-container').css('display', 'flex');
       $('.username-form').remove();
@@ -62,14 +63,6 @@ $(document).ready(() => {
     }
   });
 
-  socket.on('user changed channel', (newChannel) => {
-    socket.join(newChannel);
-    socket.emit('user changed channel', {
-      channel : newChannel,
-      messages : channels[newChannel]
-    });
-  });
-
   socket.on('user has left', (data) => {
     $('.users-online').empty();
     for(username in data.onlineUsers){
@@ -93,7 +86,7 @@ $(document).ready(() => {
 
   socket.on('new message', (data) => {
     let currentChannel = $('.channel-current').text();
-    if(currentChannel == data.channel) {
+    if (currentChannel == data.channel) {
       $('.message-container').append(`
         <div class="message">
           <p class="message-user">${data.sender}: </p>
@@ -113,7 +106,7 @@ $(document).ready(() => {
     $(`.channel:contains('${data.channel}')`).addClass('channel-current');
     $('.channel-current').removeClass('channel');
     $('.message').remove();
-    data.messages.forEach((message) => {
+    data.messages.forEach( (message) => {
       $('.message-container').append(`
         <div class="message">
           <p class="message-user">${message.sender}: </p>
@@ -121,6 +114,14 @@ $(document).ready(() => {
         </div>
       `);
     });
+  });
+
+  socket.on('get all channels', (channels) => {
+    for (channel in channels) {
+      if (channel !== "General") {
+        $('.channels').append(`<div class="channel">${channel}</div>`);
+      }
+    }
   });
 
 });

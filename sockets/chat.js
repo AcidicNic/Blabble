@@ -9,18 +9,14 @@ const sanitizeUsernameOptions = {
 };
 
 module.exports = (io, socket, onlineUsers, channels) => {
-  // Listen for "new user" socket emits
   socket.on('new user', (username) => {
     username = sanitizeHtml(username.trim(), sanitizeUsernameOptions);
     onlineUsers[username] = socket.id;
     socket["username"] = username;
-    console.log(`✋ ${username} has joined the chat! ✋`);
-    // Send the username to all clients currently connected
     io.emit("new user", username);
   });
 
   socket.on('new message', (data) => {
-    // Send that data back to ALL clients
     data.message = sanitizeHtml(data.message.trim(), sanitizeMessageOptions);
     data.sender = sanitizeHtml(data.sender.trim(), sanitizeUsernameOptions);
     channels[data.channel].push({sender : data.sender, message : data.message});
@@ -28,15 +24,25 @@ module.exports = (io, socket, onlineUsers, channels) => {
   });
 
   socket.on('get online users', () => {
-    // Send over the onlineUsers
     socket.emit('get online users', onlineUsers);
   });
 
-  socket.on('new channel', (newChannel) => {
-    console.log(newChannel);
-    channels[newChannel] = [];
+  socket.on('get all channels', () => {
+    socket.emit('get all channels', channels);
+  });
+
+  socket.on('user changed channel', (newChannel) => {
     socket.join(newChannel);
+    socket.emit('user changed channel', {
+      channel : newChannel,
+      messages : channels[newChannel]
+    });
+  });
+
+  socket.on('new channel', (newChannel) => {
+    channels[newChannel] = [];
     io.emit('new channel', newChannel);
+    socket.join(newChannel);
     socket.emit('user changed channel', {
       channel : newChannel,
       messages : channels[newChannel]
@@ -44,8 +50,6 @@ module.exports = (io, socket, onlineUsers, channels) => {
   });
 
   socket.on('disconnect', () => {
-    //This deletes the user by using the username we saved to the socket
-    console.log(`${socket.username} has left the chat. :(`);
     delete onlineUsers[socket.username]
     io.emit('user has left', {onlineUsers: onlineUsers, username: socket.username});
   });
