@@ -6,6 +6,12 @@ $(document).ready(() => {
   let currentUser;
 
   socket.emit('get online users');
+  socket.emit('user changed channel', "General");
+
+  $(document).on('click', '.channel', (e) => {
+    let newChannel = e.target.textContent;
+    socket.emit('user changed channel', newChannel);
+  });
 
   $('#create-user-btn').click( (e) => {
     e.preventDefault();
@@ -56,7 +62,14 @@ $(document).ready(() => {
     }
   });
 
-  //Refresh the online user list
+  socket.on('user changed channel', (newChannel) => {
+    socket.join(newChannel);
+    socket.emit('user changed channel', {
+      channel : newChannel,
+      messages : channels[newChannel]
+    });
+  });
+
   socket.on('user has left', (data) => {
     $('.users-online').empty();
     for(username in data.onlineUsers){
