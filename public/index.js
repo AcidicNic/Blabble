@@ -68,19 +68,9 @@ $(document).ready(() => {
     for(username in data.onlineUsers){
       $('.users-online').append(`<div class="user-online">${username}</div>`);
     }
-    $('.message-container').append(`
-      <div class="message">
-        <p class="message-announcement">${data.username} has left the chat!</p>
-      </div>
-    `);
   });
 
   socket.on('new user', (username) => {
-    $('.message-container').append(`
-      <div class="message">
-        <p class="message-announcement">${username} has joined the chat!</p>
-      </div>
-    `);
     $('.users-online').append(`<div class="user-online">${username}</div>`);
   });
 
@@ -107,12 +97,20 @@ $(document).ready(() => {
     $('.channel-current').removeClass('channel');
     $('.message').remove();
     data.messages.forEach( (message) => {
-      $('.message-container').append(`
-        <div class="message">
-          <p class="message-user">${message.sender}: </p>
-          <p class="message-text">${message.message}</p>
-        </div>
-      `);
+      if (message.announcement) {
+        $('.message-container').append(`
+          <div class="message">
+            <p class="message-announcement">${message.message}</p>
+          </div>
+        `);
+      } else {
+        $('.message-container').append(`
+          <div class="message">
+            <p class="message-user">${message.sender}: </p>
+            <p class="message-text">${message.message}</p>
+          </div>
+        `);
+      }
     });
   });
 

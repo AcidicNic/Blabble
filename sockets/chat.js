@@ -13,6 +13,7 @@ module.exports = (io, socket, onlineUsers, channels) => {
     username = sanitizeHtml(username.trim(), sanitizeUsernameOptions);
     onlineUsers[username] = socket.id;
     socket["username"] = username;
+    channels["General"].push({sender : "", announcement: true, message: `${username} has joined the chat!`});
     io.emit("new user", username);
   });
 
@@ -40,8 +41,10 @@ module.exports = (io, socket, onlineUsers, channels) => {
   });
 
   socket.on('new channel', (newChannel) => {
-    channels[newChannel] = [];
-    io.emit('new channel', newChannel);
+    if (!channels[newChannel]) {
+      channels[newChannel] = [];
+      io.emit('new channel', newChannel);
+    }
     socket.join(newChannel);
     socket.emit('user changed channel', {
       channel : newChannel,
@@ -51,6 +54,9 @@ module.exports = (io, socket, onlineUsers, channels) => {
 
   socket.on('disconnect', () => {
     delete onlineUsers[socket.username]
-    io.emit('user has left', {onlineUsers: onlineUsers, username: socket.username});
+    if (socket.username) {
+      channels["General"].push({sender : "", announcement: true, message: `${socket.username} has left the chat!`});
+      io.emit('user has left', {onlineUsers: onlineUsers, username: socket.username});
+    }
   });
 }
