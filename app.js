@@ -1,4 +1,8 @@
 /* app.js */
+require('dotenv').config();
+const port = process.env.PORT || 666;
+const env = process.env.ENV || 'DEV';
+
 const express = require('express');
 const app = express();
 
@@ -28,6 +32,10 @@ app.get('/', (req, res) => {
   res.render('index.hbs');
 })
 
-server.listen('3000', () => {
-  console.log('Server listening on Port http://localhost:3000');
+server.listen(port, () => {
+  if (env === 'DEV') {
+    console.log(`Server listening on http://localhost:${port}`);
+  } else {
+    console.log(`Server listening on http://blab.nicc.io/`);
+  }
 })
