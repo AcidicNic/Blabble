@@ -8,7 +8,7 @@ const sanitizeUsernameOptions = {
   allowedAttributes: {}
 };
 
-module.exports = (io, socket, onlineUsers) => {
+module.exports = (io, socket, onlineUsers, channels) => {
   // Listen for "new user" socket emits
   socket.on('new user', (username) => {
     username = sanitizeHtml(username.trim(), sanitizeUsernameOptions);
@@ -23,7 +23,7 @@ module.exports = (io, socket, onlineUsers) => {
     // Send that data back to ALL clients
     data.message = sanitizeHtml(data.message.trim(), sanitizeMessageOptions);
     data.sender = sanitizeHtml(data.sender.trim(), sanitizeUsernameOptions);
-    console.log(`🎤 ${data.sender}: ${data.message} 🎤`)
+    channels[data.channel].push({sender : data.sender, message : data.message});
     io.emit('new message', data);
   });
 
@@ -34,6 +34,13 @@ module.exports = (io, socket, onlineUsers) => {
 
   socket.on('new channel', (newChannel) => {
     console.log(newChannel);
+    channels[newChannel] = [];
+    socket.join(newChannel);
+    io.emit('new channel', newChannel);
+    socket.emit('user changed channel', {
+      channel : newChannel,
+      messages : channels[newChannel]
+    });
   });
 
   socket.on('disconnect', () => {
