@@ -7,17 +7,23 @@ $(document).ready(() => {
 
   socket.emit('get online users');
 
-  $('#create-user-btn').click((e) => {
+  $('#leave-chat-btn').click( (e) => {
     e.preventDefault();
+    window.location.reload(true);
+  });
+
+  $('#create-user-btn').click( (e) => {
+    e.preventDefault();
+
     if($('#username-input').val().length > 0){
       socket.emit('new user', $('#username-input').val());
-      currentUser = $('#username-input').val()
-      $('.username-form').remove();
+      currentUser = $('#username-input').val();
       $('.main-container').css('display', 'flex');
+      $('.username-form').remove();
     }
   });
 
-  $('#send-chat-btn').click((e) => {
+  $('#send-chat-btn').click( (e) => {
     console.log('anyone there??');
     e.preventDefault();
     let message = $('#chat-input').val();

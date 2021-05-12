@@ -34,6 +34,7 @@ module.exports = (io, socket, onlineUsers) => {
 
   socket.on('disconnect', () => {
     //This deletes the user by using the username we saved to the socket
+    console.log(`${socket.username} has left the chat. :(`);
     delete onlineUsers[socket.username]
     io.emit('user has left', onlineUsers);
   });
