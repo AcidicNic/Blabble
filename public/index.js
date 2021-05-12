@@ -7,11 +7,6 @@ $(document).ready(() => {
 
   socket.emit('get online users');
 
-  $('#leave-chat-btn').click( (e) => {
-    e.preventDefault();
-    window.location.reload(true);
-  });
-
   $('#create-user-btn').click( (e) => {
     e.preventDefault();
 
@@ -36,6 +31,21 @@ $(document).ready(() => {
     }
   });
 
+  $('#leave-chat-btn').click( (e) => {
+    e.preventDefault();
+    window.location.reload(true);
+  });
+
+  $('#new-channel-btn').click( () => {
+    let newChannel = $('#new-channel-input').val();
+
+    if(newChannel.length > 0){
+      // Emit the new channel to the server
+      socket.emit('new channel', newChannel);
+      $('#new-channel-input').val("");
+    }
+  });
+
   // socket listeners
   socket.on('get online users', (onlineUsers) => {
     //You may have not have seen this for loop before. It's syntax is for(key in obj)
@@ -46,14 +56,24 @@ $(document).ready(() => {
   });
 
   //Refresh the online user list
-  socket.on('user has left', (onlineUsers) => {
+  socket.on('user has left', (data) => {
     $('.users-online').empty();
-    for(username in onlineUsers){
+    for(username in data.onlineUsers){
       $('.users-online').append(`<div class="user-online">${username}</div>`);
     }
+    $('.message-container').append(`
+      <div class="message">
+        <p class="message-announcement">${data.username} has left the chat!</p>
+      </div>
+    `);
   });
 
   socket.on('new user', (username) => {
+    $('.message-container').append(`
+      <div class="message">
+        <p class="message-announcement">${username} has joined the chat!</p>
+      </div>
+    `);
     $('.users-online').append(`<div class="user-online">${username}</div>`);
   });
 
@@ -63,7 +83,7 @@ $(document).ready(() => {
         <p class="message-user">${data.sender}: </p>
         <p class="message-text">${data.message}</p>
       </div>
-  `);
+    `);
   });
 
 })

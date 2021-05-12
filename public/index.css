@@ -160,8 +160,15 @@ label {
 
 .message-user {
   display: inline;
-  color: red;
+  color: #4d394b;
   font-weight: bold;
+}
+
+.message-announcement {
+  display: inline;
+  color: #4f9689;
+  font-weight: bold;
+  font-style: italic;
 }
 
 .message-text {
